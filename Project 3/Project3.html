@@ -1,0 +1,577 @@
+
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<title>3D Animated Scene</title>
+<style>
+</style>
+<script src="three.min.js"></script>
+<script>
+
+"use strict";
+
+/*  
+ *  Name: Bedemariam Degef
+ *  Class: CMSC 405
+ *  Date: 02/22/2021
+ * Project3.html: this class implements the three.js libraries offered by javascript to 
+ * create a 3D Snowman Animated Scene. This scene includes a 3D snowman, and 4 3D trees. 
+ * This program allows animation, and includes radio buttons, that allow you to view
+ * each item seperate, or all items together. The snowman and the trees are the only items 
+ * that can be animated. 
+ */
+
+
+var scene, camera, renderer;  	// Three.js rendering basics.
+var canvas;  					// The canvas on which the image is rendered.
+
+// Contains the visible objects in the scene, but not the lights or camera. 
+// The model can be rotated using the keyboard. 
+
+var model; 
+
+// Nodes in the scene graphs that are modified as part of the animation:
+// these are the variables that are used throughout the program to create
+// the scene.
+
+var snow, trees, out, newModel;
+var all;
+var light;
+var geo;
+var snowMan;
+var tree;
+var arm1, arm2;
+var nose;
+var hat;
+var button1, button2, button3, button4;
+var rightEye, leftEye;
+var middleBall,bottomBall,topBall;
+var treeTrunk1,treeTrunk2,treeTrunk3,treeTrunk4;
+var treeTop1,treeTop2,treeTop3,treeTop4;
+var ground, left, right, outside;
+var light1, light2, light3, light4;
+
+// This is set to true when an animation is running.
+
+var animating = false;  
+
+
+/*  createWorld function method: creates the scene graph. This function is called once,
+    as soon as the page loads. The renderer has already been created before this function 
+	is called.
+ */
+ 
+function createWorld() 
+{
+    renderer.setClearColor(0xbedff6);  	// Set background color light blue
+	scene = new THREE.Scene();			// creates a new scene named scene
+	
+	// create a camera, sitting on the positive z-axis. The camera is not part of the scene.
+	camera = new THREE.PerspectiveCamera(45, canvas.width/canvas.height, 1, 30);
+	camera.position.z = 15;		
+	
+    // create some lights and add them to the scene.
+	scene.add(new THREE.DirectionalLight(0xffffff, 1)); // dim light shining from above
+	light = new THREE.DirectionalLight(0xffffff, 1);  // a light to shine in the direction the camera faces
+	light.position.set(0,0,1);  // shines down the z-axis
+	light.shadowCameraNear = 2;
+	light.shadowCameraFar = 5;
+	light.shadowCameraLeft = -0.5;
+	light.shadowCameraRight = 0.5;
+	light.shadowCameraTop = 0.5;
+	light.shadowCameraBottom = -0.5;
+	scene.add(light);			// adds the  light			
+	
+	// creates the model. This is what everything will get added to 
+	model = new THREE.Object3D();
+	
+	//-------------------------creates tree -------------------------------//
+	
+	// treeTrunk1 of tree of the first tree outside.
+	// The tree trunk is the far back right one
+
+	treeTrunk1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2,0.2,1,16,1),
+		new THREE.MeshLambertMaterial(
+		{
+		    color: 0x885522
+		})
+	);
+	treeTrunk1.position.x = 4.5;  // move base up to origin
+	
+	// treeTop1 of tree of the first tree outside.
+	// The tree top is the far back right one
+	
+	treeTop1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0,.7,2,16,3),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: 0x00BB00,
+			specular: 0x002000,
+			shininess: 5
+		})
+	);
+	treeTop1.position.y = 1.2;  // move bottom of cone to top of trunk y-axis
+	treeTop1.position.x = 4.5; 	// move bottom of the cone to top of trunk x-axis
+	
+	// light1 of tree of the first tree outside.
+	// The light is the far back right one. 
+	
+	light1 = new THREE.Mesh(
+		new THREE.SphereGeometry(.2,8,16),
+		new THREE.MeshPhongMaterial(
+		{
+			color: "yellow",
+			specular: 0x101010,
+			shininess:100
+		})
+	);
+	light1.position.set(4.5,2.2,0);
+
+	// creates a clone of the first light
+	
+	light2 = light1.clone();
+	light1.position.set(-4.5,2.2,0);
+	
+	// creates a clone of the second light
+	
+	light3 = light2.clone();
+	light2.position.set(3.5,2.1,7);
+	
+	// creates a clone of the third light
+	
+	light4 = light3.clone();
+	light3.position.set(-3.5,2.1,7);
+	
+	// creates a clone of the first tree trunk, and positions it on right side 
+	
+	treeTrunk2 = treeTrunk1.clone();
+	treeTrunk2.position.x = -4.5;
+	
+	// creates a clone of the first tree top, and positions it on right side 
+	
+	treeTop2 = treeTop1.clone();
+	treeTop2.position.x = -4.5;
+	
+    // creates a clone of the second tree trunk, and positions it on right side 
+	
+	treeTrunk3 = treeTrunk2.clone();
+	treeTrunk3.position.set(3.5,0,7);
+	
+	// creates a clone of the second tree top, and positions it on right side 
+	
+	treeTop3 = treeTop2.clone();
+	treeTop3.position.set(3.5,1,7);
+	
+	  // creates a clone of the third tree trunk, and positions it on right side 
+	
+	treeTrunk4 = treeTrunk3.clone();
+	treeTrunk4.position.set(-3.5,0,7);
+	
+	// creates a clone of the third tree top, and positions it on right side 
+	
+	treeTop4 = treeTop3.clone();
+	treeTop4.position.set(-3.5,1,7);
+	
+	// adds the objects to the tree
+	
+	tree = new THREE.Object3D();	// new 3D object named tree
+	tree.add(treeTrunk1);			// adds treeTrunk1
+	tree.add(treeTrunk2);			// adds treeTrunk2
+	tree.add(treeTrunk3);			// adds treeTrunk3
+	tree.add(treeTrunk4);			// adds treeTrunk4
+	tree.add(treeTop1);				// adds treeTop1
+	tree.add(treeTop2);				// adds treeTop2
+	tree.add(treeTop3);				// adds treeTop3
+	tree.add(treeTop4);				// adds treeTop4
+	tree.add(light1);				// adds light1
+	tree.add(light2);				// adds light2
+	tree.add(light3);				// adds light3
+	tree.add(light4);				// adds light4
+	model.add(tree);				// adds the tree 3D object to the model
+	
+	//-------------------------end of tree -------------------------------//
+
+  
+  	//-------------------------creates snowman -------------------------------//
+	
+	// middle ball for snowman 
+	
+	middleBall = new THREE.Mesh(
+	    new THREE.SphereGeometry(.8, 16, 16),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "white",
+			specular: 0x101010,
+			shininess: 32
+		})
+	);
+	middleBall.position.x = 4;
+	
+	// top ball for snowman
+	
+	topBall = new THREE.Mesh(
+	    new THREE.SphereGeometry(.5,16,16),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "white",
+			specular: 0x101010,
+			shininess: 32
+		})
+	);
+	topBall.position.y = 2.2;
+	
+	// bottom ball for snowman
+
+	bottomBall = new THREE.Mesh(
+	    new THREE.SphereGeometry(1,16,16),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "white",
+			specular: 0x101010,
+			shininess: 32
+		})
+	);
+	middleBall.position.set(0,1.2,0);
+	
+	// buttons and eyes for the snowman
+	button1 = new THREE.Mesh(
+	    new THREE.SphereGeometry(.1,6,6),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "black",
+			specular: 0x101010,
+			shininess: 32
+		})
+	);
+	button1.position.set(0,0.8,.8);
+	
+	// clones button1 on the snowman
+	button2 = button1.clone();
+	button1.position.set(0,.3,1);
+	
+	// clones button2 on the snowman
+	button3 = button2.clone();
+	button2.position.set(0,1.3,.8);
+	
+	// clones button3 on the snowman
+	button4 = button3.clone();
+	button3.position.set(0,1.8,.5);
+	
+	// clones button4 on the snowman: this is an right eye on the snowman
+	rightEye = button4.clone();
+	button4.position.set(0.2,2.4,.5);
+	
+	// clones button5 on the snowman: this is an left eye on the snowman
+	leftEye = rightEye.clone();
+	rightEye.position.set(-0.2,2.4,.5);
+	
+	// hat for the snowman 
+	hat = new THREE.Mesh(
+	    new THREE.CylinderGeometry(0,1.1,.5,8,1),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "black",
+			specular: 0x002000,
+			shininess: 5
+		})
+	);
+	hat.position.set(0,2.8,0);
+	
+	// arm 1 of snowman
+	arm1 = new THREE.Mesh(
+		new THREE.CylinderGeometry(0.1,0.1,2),
+		new THREE.MeshPhongMaterial(
+		{
+		    color: "brown",
+			specular: 0x002000,
+			shininess: 5
+		})
+	);
+	
+	arm1.position.set(0.6,1.5,0.5);
+	arm1.rotation.x =  180;
+	arm1.rotation.y =  -95;
+	arm1.rotation.z = 20;
+	
+	// clones arm1 on the snowman
+	arm2 = arm1.clone();	
+	arm1.position.set(-0.6,1.5,0.5);
+	arm1.rotation.x =  -90;
+	arm1.rotation.y =  180;
+	arm1.rotation.z = 20;
+	
+	// nose for the snowman
+	nose = new THREE.Mesh(
+		new THREE.CylinderGeometry(0,0.1,.9),
+		new THREE.MeshPhongMaterial(
+		{
+			color: "orange",
+			specular: 0x002000,
+			shininess: 5
+		})
+	);
+	nose.position.set(0,2.2,0.5);
+	nose.rotation.x =  90;
+	nose.rotation.y = -90;
+	nose.rotation.z = 20;
+
+	// adds all objects to snowman 
+	
+	snowMan = new THREE.Object3D();	// new 3D object named snowMan
+	
+	// three spheres to make snowman
+	
+	snowMan.add(middleBall);		// adds middleBall to snowMan
+	snowMan.add(topBall);			// adds topBall to snowMan
+	snowMan.add(bottomBall);		// adds bottomBall to snowMan
+	
+	// 4 spheres to make buttons on snowman
+	snowMan.add(button1);			// adds button1 to snowMan
+	snowMan.add(button2);			// adds button2 to snowMan
+	snowMan.add(button3);			// adds button3 to snowMan
+	snowMan.add(button4);			// adds button4 to snowMan
+	
+	// 2 spheres to make a right and left eye for the snowman
+	snowMan.add(rightEye);			// adds rightEye to snowMan
+	snowMan.add(leftEye);			// adds leftEye to snowMan
+	
+	// 1 cylinder to make the hat on the snowman
+	snowMan.add(hat);				// adds hat to snowMan
+	
+	// 2 cylinders to make the arms on the snowman
+	snowMan.add(arm1);				// adds arm1 to snowMan
+	snowMan.add(arm2);				// adds arm2 to snowMan
+	
+	// 1 cylinder to make the nose on the snowman
+	snowMan.add(nose);				// adds nose to snowMan
+	
+	model.add(snowMan);				// adds the snowMan 3D object to the model
+
+	//-------------------------ends snowman -------------------------------//	
+	
+	//-------------------------creates outside -------------------------------//
+
+		
+	// ground outside. Implements PlaneGeometry, and sets the color
+	// of the ground to white. Uses doubleside material. positions 
+	// the ground using the x, y, and z axis. Lastly it does recieve
+	// a shadow
+	
+	outside = new THREE.Object3D();	
+	geo = new THREE.PlaneGeometry(20, 60);
+    ground = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xe5f2fb})); 
+    ground.material.side = THREE.DoubleSide;
+    ground.rotation.x = Math.PI/2;
+    ground.position.y = -2;  
+	ground.position.z = 10;
+    ground.receiveShadow = true;
+	
+	// left side outside. Implements PlaneGeometry, and sets the color
+	// of the left side to light blue. Uses doubleside material. positions 
+	// the ground using the x, y, and z axis.
+	
+    geo = new THREE.PlaneGeometry(60,20);
+    left = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color : 0xb1d9f4})); 
+    left.material.side = THREE.DoubleSide;
+    left.rotation.y = Math.PI/2;
+    left.position.x = -8;
+    left.position.z = 12;
+	
+	 // right side outside. Clones the left side of the outside, and all
+	 // of its features, and positions it on the right. 
+	 
+    right = left.clone();	// clones the left side of the outside
+    right.position.x = 8;	// positions it on the right side instead of the left
+	
+	
+	// adds the objects for the outside part of the scene. The following is added
+	// ground, left, and right.
+	
+	outside.add(ground);				// adds the ground
+	outside.add(left);					// adds the left
+	outside.add(right);					// adds the right	
+	outside.add(tree.clone());			// adds a clone of the tree 3D object
+	outside.add(snowMan.clone());		// adds a clone of the snowMan 3D object
+	model.add(outside);					// adds the outside 3D object to the model
+	
+	//-------------------------ends outside -------------------------------//
+
+	model.rotation.set(0.2,0,0); // Tip it forward a bit, so we're not looking at it edge-on.
+	scene.add(model);	// adds the model to the scene
+}
+
+/*  render function method: renders the scene. This is called for each frame 
+    of the animation.
+ */
+ 
+function render() 
+{
+    renderer.render(scene, camera);		// takes the parameters scene and camera
+}
+
+/*  updateForFrame function method: When an animation is in progress, this function is
+    called just before rendering each frame of the animation, to make any changes
+	necessary in the scene graph to prepare for that frame.
+ */
+ 
+function updateForFrame() 
+{	
+	if(model == snowMan) 	// if model is equal to snowMan
+	{
+		snowMan.rotation.y += 0.03;		// rotates the snowman at a speed of 0.03 
+	}
+	else if(model == tree)	// else if model is equal to tree
+	{
+		treeTop1.rotation.y += 0.03;	// rotates the treeTop1 at a speed of 0.03 
+		treeTop2.rotation.y += 0.03;	// rotates the treeTop2 at a speed of 0.03 
+		treeTop3.rotation.y += 0.03;	// rotates the treeTop3 at a speed of 0.03 
+		treeTop4.rotation.y += 0.03;	// rotates the treeTop4 at a speed of 0.03 
+	}
+}
+
+
+//--------------------------- animation support -----------------------------------
+
+/* doFrame function method: This function runs the animation by calling updateForFrame() 
+   then calling render().Finally, it arranges for itself to be called again to do the next
+   frame. When the value of animating is set to false, this function does not schedule the
+   next frame, so the animation stops.
+ */
+ 
+function doFrame() 
+{
+    if(animating) 	// if animating
+	{
+        updateForFrame();	// update the frame 
+        render();			// render
+        requestAnimationFrame(doFrame); 
+	}
+}
+
+
+/* doAnimateCheckbox function method: responds when the setting of the "Animate" checkbox is changed.  
+   This function will start or stop the animation, depending on its setting.
+ */
+function doAnimateCheckbox() 
+{
+    var anim = document.getElementById("animate").checked;
+	if (anim != animating) 
+	{
+		animating = anim;
+		if (animating) 
+		{
+			doFrame();
+		}
+	}
+}
+
+//----------------------------- keyboard support ----------------------------------
+
+/*  doKey function method: Responds to user's key press. Here, it is used to rotate the model.
+ */
+function doKey(event) 
+{
+	var code = event.keyCode;
+	var rotated = true;
+	
+	switch(code) 	// start of switch statement 
+	{
+	    case 37: model.rotation.y -= 0.03;  break;    // left arrow
+	    case 39: model.rotation.y +=  0.03; break;    // right arrow
+	    case 38: model.rotation.x -= 0.03;  break;    // up arrow
+	    case 40: model.rotation.x += 0.03;  break;    // down arrow
+	    case 33: model.rotation.z -= 0.03;  break;    // page up
+	    case 34: model.rotation.z += 0.03;  break;    // page down
+	    case 36: model.rotation.set(0.2,0,0); break;  // home
+	    default: rotated = false;
+	}
+	if(rotated) 	// if the scene is rotated
+	{
+		event.preventDefault();  // Prevent keys from scrolling the page.
+		
+		// (if an animation is running, no need for an extra render)
+
+		if(!animating) // call the render method
+		{ 
+			render();	// call the render method
+		}
+	}
+}
+
+/*  doChangeModel function method: used to change objects in the scene
+ */
+
+function doChangeModel() 
+{
+    snow = document.getElementById("snow").checked;
+	trees = document.getElementById("trees").checked
+	newModel = snow ? snowMan : trees ? tree : outside;
+	
+	if(newModel != model) 		// if newModel is not equal to model
+	{
+		scene.remove(model);			// removes old model from the scene
+		model = newModel;				// model is newModel
+		model.rotation.set(0.2,0,0);	// sets the rotation set of the model
+		scene.add(model);				// adds model to scene
+		
+		if(!animating) 	// call the render method
+		{
+			render();	// call the render method
+		}
+	}
+}
+
+//----------------------------------------------------------------------------------
+
+/**
+ *  init function method:  is called when by the onload event when the document has loaded.
+ */
+ 
+function init() 
+{
+	try  // exception handling 
+	{
+	    canvas = document.getElementById("glcanvas");
+		renderer = new THREE.WebGLRenderer( 
+		{
+		    canvas: canvas,
+		    antialias: true
+		} );
+	}
+	catch(e) // catches an exception 
+	{
+		document.getElementById("canvas-holder").innerHTML = "<h3><b>Sorry, WebGL is required but is not available.</b><h3>";
+		return;	// returns
+	}
+	document.addEventListener("keydown", doKey, false);
+	document.getElementById("animate").checked = false;
+	document.getElementById("animate").onchange = doAnimateCheckbox;
+	document.getElementById("out").checked = true;
+	document.getElementById("snow").onchange = doChangeModel;
+	document.getElementById("trees").onchange = doChangeModel;
+	document.getElementById("out").onchange = doChangeModel;
+	createWorld();
+	render();
+}
+
+</script>
+</head>
+<body onload="init()">
+
+<h2>3D Snowman Animated Scene </h2>
+
+<p><b>Use Arrow, PageUp, PageDown, and Home keys to rotate the model.</b></p>
+
+<p><label><input type="checkbox" id="animate">Animate</label>
+	<label style="margin-left: 20px"><input type="radio" id="snow" name="model">Show Snowman</label>
+	<label style="margin-left: 20px"><input type="radio" id="trees" name="model">Show Trees</label>
+	<label style="margin-left: 20px"><input type="radio" id="out" name="model">Show Everything</label>
+</p>
+
+<div id="canvas-holder">
+<canvas id="glcanvas" width="640" height="480"></canvas>
+</div>
+
+</body>
+</html>
